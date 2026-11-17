@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>SOLMAR HEAT — An Open-City Story</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- Top-left HUD: health, cash, wanted, clock -->
+<div id="hud" class="corner tl">
+  <div class="hud-row">
+    <div class="health-bar"><div id="health-fill"></div></div>
+    <span id="health-text" class="hud-num">100</span>
+  </div>
+  <div class="hud-row"><span id="cash" class="hud-cash">$250</span><span id="stars" class="hud-stars">☆☆☆☆☆</span></div>
+  <div class="hud-row"><span id="clock" class="hud-small">08:00 · Solmar City</span></div>
+  <div class="hud-row"><span id="story" class="hud-small">Story 0/5 · First Wheels</span></div>
+</div>
+
+<!-- Top-right minimap -->
+<canvas id="minimap" width="180" height="180"></canvas>
+
+<!-- Bottom-left objective -->
+<div id="objective" class="corner bl" style="display:none">
+  <div id="objective-title" class="obj-title">Job</div>
+  <div id="objective-body" class="obj-body">Do the job</div>
+  <div id="objective-timer" class="obj-timer"></div>
+</div>
+
+<!-- Bottom-right speed / ammo -->
+<div id="speedbox" class="corner br">
+  <span id="speed" class="hud-small"></span>
+  <span id="ammo" class="hud-small"></span>
+</div>
+
+<!-- Centre toast + context prompt -->
+<div id="message" class="toast"></div>
+<div id="prompt" class="prompt"></div>
+
+<!-- Touch controls (shown on touch devices) -->
+<div id="touch" style="display:none">
+  <div class="t-left">
+    <button id="t-up" class="tbtn">▲</button>
+    <button id="t-left" class="tbtn">◀</button>
+    <button id="t-down" class="tbtn">▼</button>
+    <button id="t-right" class="tbtn">▶</button>
+    <button id="t-run" class="tbtn small">RUN</button>
+  </div>
+  <div class="t-right">
+    <button id="t-enter" class="tbtn">E</button>
+    <button id="t-punch" class="tbtn">F</button>
+    <button id="t-shoot" class="tbtn">FIRE</button>
+  </div>
+</div>
+
+<!-- Start menu -->
+<div id="menu" class="overlay">
+  <div class="panel">
+    <h1>SOLMAR HEAT</h1>
+    <p class="tagline">An open-city story · Solmar City</p>
+    <p class="desc">Free roam the city on foot or by car. Take jobs at the markers, run the five-part story for Rosa, and stay out of the PD's way — or don't.</p>
+    <button id="btn-play" class="menu-btn">Play</button>
+    <button id="btn-continue" class="menu-btn">Continue</button>
+    <button id="btn-howto" class="menu-btn">How to play</button>
+    <button id="btn-settings" class="menu-btn">Settings</button>
+    <button id="btn-mute" class="menu-btn">Sound: On</button>
+    <p id="save-note" class="tiny">No saved game yet.</p>
+  </div>
+</div>
+
+<!-- How to play -->
+<div id="howto" class="overlay" style="display:none">
+  <div class="panel">
+    <h2>How to play</h2>
+    <p class="howto-text">
+      WASD / Arrows — Move or drive<br>
+      Shift — Run<br>
+      E — Enter / exit a car · Take a job at a marker<br>
+      F — Punch<br>
+      Mouse — Aim · Click — Shoot<br>
+      Space — Brake<br>
+      H — Horn · M — Mute · P — Pause<br><br>
+      Gold markers are story jobs from Rosa. Green markers are delivery jobs, yellow is a taxi fare, red is an ambulance run. Earn $100,000 or finish the story to win. Wanted stars bring the PD — lose them by staying out of sight. Health refills at Solmar General. Your game saves itself.
+    </p>
+    <button id="btn-howto-back" class="menu-btn">Back</button>
+  </div>
+</div>
+
+<!-- Settings -->
+<div id="settings" class="overlay" style="display:none">
+  <div class="panel">
+    <h2>Settings</h2>
+    <p class="howto-text">Sound, saves and a fresh start. The game autosaves every 30 seconds and after every job.</p>
+    <button id="btn-reset-save" class="menu-btn">Delete saved game</button>
+    <button id="btn-settings-back" class="menu-btn">Back</button>
+  </div>
+</div>
+
+<!-- Pause -->
+<div id="pause" class="overlay" style="display:none">
+  <div class="panel">
+    <h2>Paused</h2>
+    <button id="btn-resume" class="menu-btn">Resume</button>
+    <button id="btn-save" class="menu-btn">Save game</button>
+    <button id="btn-quit" class="menu-btn">Save &amp; quit to menu</button>
+  </div>
+</div>
+
+<!-- Busted -->
+<div id="busted" class="overlay" style="display:none">
+  <div class="panel small-panel">
+    <h2>BUSTED</h2>
+    <p id="busted-fine" class="howto-text">The PD took its cut.</p>
+    <button id="btn-busted-ok" class="menu-btn">Walk out of the station</button>
+  </div>
+</div>
+
+<!-- Wasted -->
+<div id="wasted" class="overlay" style="display:none">
+  <div class="panel small-panel">
+    <h2>WASTED</h2>
+    <p id="wasted-bill" class="howto-text">Solmar General patched you up.</p>
+    <button id="btn-wasted-ok" class="menu-btn">Leave the hospital</button>
+  </div>
+</div>
+
+<!-- Win -->
+<div id="win" class="overlay" style="display:none">
+  <div class="panel small-panel">
+    <h2>SOLMAR IS YOURS</h2>
+    <p class="howto-text">Rex paid off the garage and owns the city now.</p>
+    <p id="win-stats" class="howto-text"></p>
+    <button id="btn-win-keep" class="menu-btn">Keep playing</button>
+    <button id="btn-win-menu" class="menu-btn">Back to menu</button>
+  </div>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
