@@ -1,5 +1,1 @@
-[
-  { "name": "1-start.jpg", "query": "?shot=start&seed=1" },
-  { "name": "2-play.jpg", "query": "?shot=play&seed=1" },
-  { "name": "3-end.jpg", "query": "?shot=end&seed=1" }
-]
+{"shots":[{"file":"1-chase.jpg","note":"Cover: wanted-3 chase in the Falco GT, police cars and helicopter behind, sunset beach road.","scene":"chase","url":"index.html?scene=chase"},{"file":"2-downtown.jpg","note":"On foot downtown with traffic, pedestrians and glowing shopfronts.","scene":"downtown","url":"index.html?scene=downtown"},{"file":"3-mission.jpg","note":"Food delivery mission active at Rosa's Diner with the gold marker.","scene":"mission","url":"index.html?scene=mission"},{"file":"4-menu.jpg","note":"Title screen over the 3D city at golden hour.","scene":"menu","url":"index.html?scene=menu"}]}

@@ -1,43 +1,24 @@
+# gta6-01
+
 [![make.fun · gta6-01](https://make.fun/badge/gta6-01.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
-[![make.fun · gta6-01 rank](https://make.fun/badge/gta6-01/Ikball53/gta6-01/rank.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
-[![make.fun · gta6-01 reward](https://make.fun/badge/gta6-01/Ikball53/gta6-01/reward.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+[![rank](https://make.fun/badge/gta6-01/Ikball53/gta6-01/rank.svg)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+[![reward](https://make.fun/badge/gta6-01/Ikball53/gta6-01/reward.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 
-# SOLMAR HEAT
+**SOLMAR HEAT** — a full 3D open-world crime game in the browser, built with Three.js. Drive and walk through Solmar City at golden hour: steal cars, outrun the Solmar PD, lose the police helicopter, and run Rosa's five-chapter story from a stolen Falco GT to the vault heist. Traffic obeys the lights, the metro loops downtown, and side jobs (food delivery, taxi fares, ambulance runs) pay cash toward the $100,000 win.
 
-An original open-world crime game built for make.fun's "Make GTA 6" bounty. You are a wheelman new to Solmar City — a living top-down city of streets, traffic, pedestrians, shops, and a train line — trying to earn your place while the Solmar PD watches every move.
+## Run it
 
-## What is in the city
+Serve the `game/` folder with any static server and open `index.html`:
 
-- **Open world, free roam** — drive or walk anywhere in Solmar City: downtown blocks, Rosa's Diner, the Solmar Grand, Bay Burger, Palm Pharmacy, and the train stations.
-- **Cars** — steal parked cars, drive sedans and sports cars, outrun the police when the heat is on.
-- **Police and wanted level** — cause trouble and the stars climb; patrol cars chase, sirens wailing, until you lose them or get busted.
-- **Missions and story** — a five-part story for Rosa, plus delivery and taxi jobs at the markers around town. Earn cash, buy your way up.
-- **Minimap and HUD** — live minimap, health, cash, wanted stars, clock, and objective tracker always on screen.
-- **Save** — progress autosaves in the browser, so you can pick up where you left off.
-
-## How to play
-
-Open `game/index.html` in a browser, or serve the folder and visit it:
-
-```
+```sh
 node serve.ts
+# then open http://localhost:8080
 ```
 
-Then open http://localhost:8080
+No build step, no network requests — Three.js is vendored under `game/vendor/`. Keyboard and mouse on desktop; touch joystick + buttons on landscape phones. Progress autosaves to localStorage.
 
-- **WASD / Arrows** — move on foot or drive
-- **Shift** — run
-- **E** — enter / exit a car
-- **Space** — brake
-- **H** — horn
-- **Click** — shoot, **F** — punch
+## Scenes
 
-Take jobs at the green markers, finish Rosa's five story jobs, and stay out of the PD's way — or don't.
+Add `?scene=chase`, `?scene=downtown`, or `?scene=mission` to jump straight into a set piece (default is the title menu). `?seed=` changes the city layout randomisation.
 
-## Screenshots
-
-The three screenshots in `screenshots/` are real renders of SOLMAR HEAT: the start menu over the city, a police chase mid-game, and a food-delivery mission at Rosa's Diner.
-
-## License
-
-MIT — see `LICENSE`.
+<sub>Entered on [make.fun](https://make.fun/?ref=06mvdhm0&utm_source=github&utm_medium=readme&utm_campaign=gta6-01) · AI agents build software for cash rewards</sub>
