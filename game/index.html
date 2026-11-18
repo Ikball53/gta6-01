@@ -3,76 +3,78 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>SOLMAR HEAT — an open-world crime game</title>
+<title>SOLMAR HEAT — Solmar City</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="./style.css">
 <script type="importmap">
-{ "imports": { "three": "./vendor/three.module.min.js" } }
+{
+  "imports": {
+    "three": "./vendor/three.module.min.js"
+  }
+}
 </script>
 </head>
 <body>
-<div id="game"></div>
-
-<!-- HUD: small text, top-left. Minimap is north-up and never rotates. -->
-<div id="hud">
-  <canvas id="minimap" width="168" height="168"></canvas>
-  <div id="money">$500</div>
-  <div id="health"><div id="health-fill"></div></div>
-  <div id="stars">☆☆☆☆☆</div>
-  <div id="objective">Free roam — visit Rosa to start her story.</div>
-</div>
-<div id="speed"></div>
-<div id="toast"></div>
-<div id="err"></div>
-
-<!-- Touch controls: big joystick (160px) and big buttons (88px). -->
-<div id="touch-ui">
-  <div id="stick-base"><div id="stick-knob"></div></div>
-  <div id="touch-buttons">
-    <button class="tbtn" data-act="sprint">RUN</button>
-    <button class="tbtn" data-act="enter">CAR</button>
-    <button class="tbtn" data-act="punch">HIT</button>
-  </div>
-</div>
-
-<!-- Start screen -->
-<div id="menu">
-  <div class="panel">
-    <h1>SOLMAR HEAT</h1>
-    <p class="tag">An open-world crime story in Solmar City.<br>Free roam, steal cars, outrun the law, finish Rosa's five jobs.</p>
-    <div class="row">
-      <button id="btn-play">Play</button>
-      <button id="btn-continue">Continue</button>
-    </div>
-    <div class="row">
-      <button id="btn-how">How to play</button>
-      <button id="btn-settings">Settings</button>
-      <button id="btn-mute">Mute</button>
-    </div>
-    <div id="how-panel" class="subpanel">
-      <p><b>Move:</b> W A S D or left stick — A / D turn you, W walks forward.<br>
-      <b>Sprint:</b> Shift or RUN. <b>Enter car:</b> E or CAR. <b>Punch:</b> F or HIT.<br>
-      <b>Drive:</b> W accelerate, S brake / reverse, A / D steer.<br>
-      <b>Mute:</b> M. <b>Pause:</b> P. Win at $50,000 with Rosa's story, or $100,000 rich.<br>
-      Hospital refills health. Chop Shop buys stolen cars.</p>
-      <button id="btn-how-close">Close</button>
-    </div>
-    <div id="settings-panel" class="subpanel">
-      <label><input type="checkbox" id="opt-mute"> Mute all sound</label><br>
-      <label><input type="checkbox" id="opt-shadows" checked> Shadows</label><br>
-      <button id="btn-settings-close">Close</button>
+<div id="app">
+  <canvas id="gl"></canvas>
+  <div id="corner">
+    <canvas id="map" width="168" height="168"></canvas>
+    <div id="hud">
+      <div id="hud-cash">$5,000</div>
+      <div id="hud-health">HP 100</div>
+      <div id="hud-wanted"></div>
+      <div id="hud-mission">Free roam — press N for missions</div>
+      <div id="hud-hint">WASD move · E enter car · M mute · H hospital heals</div>
     </div>
   </div>
-</div>
-
-<!-- Win / lose screen: simple and small. -->
-<div id="end">
-  <div class="panel small">
-    <h2 id="end-title">BUSTED</h2>
-    <p id="end-text"></p>
-    <button id="btn-again">Play again</button>
+  <div id="toast"></div>
+  <div id="banner"></div>
+  <div id="menu" class="overlay">
+    <div class="panel">
+      <h1>SOLMAR HEAT</h1>
+      <p class="sub">Solmar City · a Rosa story in five parts</p>
+      <p class="story" id="menu-story"></p>
+      <div class="btns">
+        <button id="btn-play">Play</button>
+        <button id="btn-how">How to play</button>
+        <button id="btn-settings">Settings</button>
+      </div>
+      <div id="how" class="hidden">
+        <p>W / Up — move forward · S — back · A / D — turn</p>
+        <p>E — enter / exit car · Shift — sprint · Space — horn</p>
+        <p>M — mute · P — pause · R — restart mission</p>
+        <p>Steal parked cars, dodge police, earn $50,000 to win.</p>
+        <p>Hospital refills health. Wanted 3+ brings the helicopter.</p>
+      </div>
+      <div id="settings" class="hidden">
+        <label><input type="checkbox" id="set-sound" checked> Sound</label>
+        <label><input type="checkbox" id="set-shadows" checked> Shadows</label>
+        <label>Quality
+          <select id="set-quality">
+            <option value="high">High</option>
+            <option value="low">Low</option>
+          </select>
+        </label>
+      </div>
+      <p class="save" id="menu-save"></p>
+    </div>
+  </div>
+  <div id="end" class="overlay hidden">
+    <div class="panel small">
+      <h2 id="end-title">You win</h2>
+      <p id="end-text"></p>
+      <button id="btn-again">Play again</button>
+    </div>
+  </div>
+  <div id="touch">
+    <div id="stick"><div id="stick-nub"></div></div>
+    <div id="touch-btns">
+      <button id="tb-enter" data-k="enter">E</button>
+      <button id="tb-sprint" data-k="sprint">RUN</button>
+      <button id="tb-horn" data-k="horn">HORN</button>
+    </div>
   </div>
 </div>
-
 <script type="module" src="./src/main.js"></script>
 </body>
 </html>
