@@ -83,7 +83,10 @@ export function createKeys() {
         const l = Math.hypot(dx, dy);
         if (l > 1) { dx /= l; dy /= l; }
         K.joy.x = dx; K.joy.y = -dy;
-        setKnob(dx * 34, dy * 34);
+        // Knob travel follows the actual stick size (stick is much bigger
+        // now): max travel is base radius minus knob radius.
+        const maxTravel = (r.width - knob.offsetWidth) / 2;
+        setKnob(dx * maxTravel, dy * maxTravel);
       }
       e.preventDefault();
     }, { passive: false });

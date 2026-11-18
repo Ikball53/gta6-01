@@ -146,7 +146,10 @@ export function updateWalker(W, dt) {
     let dh = targetHeading - P.heading;
     while (dh > Math.PI) dh -= Math.PI * 2;
     while (dh < -Math.PI) dh += Math.PI * 2;
-    P.heading += dh * Math.min(1, dt * 12);
+    // Frame-rate-independent turn smoothing: the old dt*12 snapped almost
+    // instantly on slow phones (dt 0.05 -> factor 0.6 in one frame), which
+    // made the heading — and the minimap arrow — swing in stiff jumps.
+    P.heading += dh * (1 - Math.exp(-dt * 10));
     P.mesh.rotation.y = P.heading;
     P.mesh.userData.walkPhase += dt * (sprint ? 13 : 9);
     const ph = P.mesh.userData.walkPhase;
@@ -191,6 +194,6 @@ export function updateWalker(W, dt) {
   camTarget.y += 1.6;
   const back = new THREE.Vector3(Math.sin(P.heading), 0, Math.cos(P.heading));
   const desired = camTarget.clone().addScaledVector(back, -6.2).add(new THREE.Vector3(0, 3.1, 0));
-  W.camera.position.lerp(desired, Math.min(1, dt * 6));
+  W.camera.position.lerp(desired, 1 - Math.exp(-dt * 6));
   W.camera.lookAt(camTarget.x, camTarget.y + 0.4, camTarget.z);
 }

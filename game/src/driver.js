@@ -108,7 +108,7 @@ export function updateDriver(W, dt) {
   const desired = camTarget.clone()
     .addScaledVector(back, 8.5 + Math.abs(P.carSpeed) * 0.08)
     .add(new THREE.Vector3(0, 3.4, 0));
-  W.camera.position.lerp(desired, Math.min(1, dt * 5));
+  W.camera.position.lerp(desired, 1 - Math.exp(-dt * 5));
   const look = camTarget.clone().addScaledVector(new THREE.Vector3(fx, 0, fz), 6);
   W.camera.lookAt(look.x, 1.6, look.z);
   // speedometer value for the HUD

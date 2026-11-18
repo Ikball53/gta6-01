@@ -17,6 +17,7 @@ export function createHud(W) {
     dialogue: $('dialogue'), dlgName: $('dlg-name'), dlgText: $('dlg-text'),
     speedo: $('speedo'), speedNum: $('speed-num'), speedCar: $('speed-car'),
     weapons: $('weapon-slots'), minimap: $('minimap'),
+    mapHeading: null, // smoothed heading for the minimap arrow (see updateHud)
     sayT: 0, sayQueue: [],
   };
   W.hud = hud;
@@ -188,6 +189,18 @@ export function updateHud(W, dt) {
     });
     h.weapons.innerHTML = html;
   }
+  // Minimap heading: a smoothed copy of the player's REAL heading only.
+  // The joystick never feeds this value — the stick only moves the player,
+  // and this chases the heading with frame-rate-independent smoothing, so
+  // the arrow turns smoothly instead of snapping in stiff jumps (which is
+  // what made the map look like it was spinning wildly on slow phones,
+  // where dt*12 could jump most of the way in a single frame).
+  const rawHeading = P.inCar ? P.inCar.heading : P.heading;
+  if (h.mapHeading === null || h.mapHeading === undefined) h.mapHeading = rawHeading;
+  let mdh = rawHeading - h.mapHeading;
+  while (mdh > Math.PI) mdh -= Math.PI * 2;
+  while (mdh < -Math.PI) mdh += Math.PI * 2;
+  h.mapHeading += mdh * (1 - Math.exp(-dt * 7));
   drawMinimap(W);
 }
 
@@ -249,12 +262,17 @@ function drawMinimap(W) {
     const [tx, ty] = toMap(c.x, c.z);
     ctx.fillRect(tx - 1, ty - 1, 2, 2);
   }
-  // player arrow
+  // player arrow — the ONLY thing on the minimap that rotates (the map
+  // itself stays north-up, N tick at the top). The arrow points along the
+  // direction of travel: canvas y runs down, so the rotation is PI -
+  // heading, not -heading — the old -heading pointed the arrow exactly
+  // backwards, which is why it looked like the map was spinning wrong.
   const [plx, ply] = toMap(px, pz);
-  const heading = P.inCar ? P.inCar.heading : P.heading;
+  const heading = (h.mapHeading !== null && h.mapHeading !== undefined)
+    ? h.mapHeading : (P.inCar ? P.inCar.heading : P.heading);
   ctx.save();
   ctx.translate(plx, ply);
-  ctx.rotate(-heading);
+  ctx.rotate(Math.PI - heading);
   ctx.fillStyle = '#fff';
   ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(5, 5); ctx.lineTo(0, 2); ctx.lineTo(-5, 5); ctx.closePath(); ctx.fill();
   ctx.restore();
