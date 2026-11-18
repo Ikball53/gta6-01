@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>SOLMAR HEAT</title>
+<title>SOLMAR HEAT — an open-world crime game</title>
 <link rel="stylesheet" href="./style.css">
 <script type="importmap">
 { "imports": { "three": "./vendor/three.module.min.js" } }
@@ -12,141 +12,67 @@
 <body>
 <div id="game"></div>
 
-<!-- crosshair -->
-<div id="crosshair">+</div>
-
-<!-- top-left: circular minimap + district (north-up; only the arrow turns) -->
-<div id="hud-map">
-  <canvas id="minimap" width="180" height="180"></canvas>
-  <div id="hud-district">OLD TOWN</div>
-  <div id="hud-street">Palm Ave</div>
+<!-- HUD: small text, top-left. Minimap is north-up and never rotates. -->
+<div id="hud">
+  <canvas id="minimap" width="168" height="168"></canvas>
+  <div id="money">$500</div>
+  <div id="health"><div id="health-fill"></div></div>
+  <div id="stars">☆☆☆☆☆</div>
+  <div id="objective">Free roam — visit Rosa to start her story.</div>
 </div>
+<div id="speed"></div>
+<div id="toast"></div>
+<div id="err"></div>
 
-<!-- top-center: mission card -->
-<div id="hud-topcenter">
-  <div id="mission-card" class="panel hidden">
-    <div id="mission-title">MISSION</div>
-    <div id="mission-text"></div>
-    <div class="bar"><div id="mission-bar"></div></div>
-    <div id="mission-next"></div>
-    <div id="mission-dist"></div>
-  </div>
-</div>
-
-<!-- top-right: cash, clock, stars, weapons, health/armor -->
-<div id="hud-topright">
-  <div id="hud-day">SAT</div>
-  <div id="hud-clock">17:20</div>
-  <div id="hud-cash">$320</div>
-  <div id="hud-stars" class="stars">☆☆☆☆☆</div>
-  <div id="weapon-slots"></div>
-  <div id="status" class="panel">
-    <div class="row"><span class="label">HEALTH</span><span id="health-num">100</span></div>
-    <div class="bar small"><div id="health-fill"></div></div>
-    <div class="row"><span class="label">ARMOR</span></div>
-    <div class="bar small blue"><div id="armor-fill"></div></div>
-  </div>
-</div>
-
-<!-- bottom-right: speedometer -->
-<div id="speedo" class="hidden">
-  <div id="speed-num">0</div>
-  <div id="speed-unit">KM/H</div>
-  <div id="speed-car">SEDAN</div>
-</div>
-
-<!-- bottom-center: dialogue -->
-<div id="dialogue" class="panel hidden">
-  <div id="dlg-name">ROSA</div>
-  <div id="dlg-text"></div>
-</div>
-
-<!-- touch controls (landscape phones) -->
+<!-- Touch controls: big joystick (160px) and big buttons (88px). -->
 <div id="touch-ui">
-  <div id="stick"><div id="stick-knob"></div></div>
+  <div id="stick-base"><div id="stick-knob"></div></div>
   <div id="touch-buttons">
-    <button id="btn-sprint" type="button">RUN</button>
-    <button id="btn-shoot" type="button">FIRE</button>
-    <button id="btn-enter" type="button">CAR</button>
+    <button class="tbtn" data-act="sprint">RUN</button>
+    <button class="tbtn" data-act="enter">CAR</button>
+    <button class="tbtn" data-act="punch">HIT</button>
   </div>
 </div>
 
-<!-- start screen -->
-<div id="screen-start" class="screen">
-  <div class="title-wrap">
-    <h1 class="game-title">SOLMAR<br><span>HEAT</span></h1>
-    <p class="tagline">A crime story in Solmar City</p>
-    <p id="save-info" class="save-info"></p>
-    <div class="menu-buttons">
-      <button id="btn-play" type="button">Play</button>
-      <button id="btn-continue" type="button" class="hidden">Continue</button>
-      <button id="btn-how" type="button">How to play</button>
-      <button id="btn-settings" type="button">Settings</button>
-      <button id="btn-mute" type="button">SOUND: ON</button>
+<!-- Start screen -->
+<div id="menu">
+  <div class="panel">
+    <h1>SOLMAR HEAT</h1>
+    <p class="tag">An open-world crime story in Solmar City.<br>Free roam, steal cars, outrun the law, finish Rosa's five jobs.</p>
+    <div class="row">
+      <button id="btn-play">Play</button>
+      <button id="btn-continue">Continue</button>
     </div>
-    <div id="howto" class="panel hidden">
-      WASD move · Mouse aim · Click shoot · F punch · E enter / exit car<br>
-      1-4 weapons · Shift sprint · Space handbrake · M mute · Esc pause<br>
-      Steal cars, lose the cops, finish Rosa's 5 chapters or reach $100,000.
+    <div class="row">
+      <button id="btn-how">How to play</button>
+      <button id="btn-settings">Settings</button>
+      <button id="btn-mute">Mute</button>
     </div>
-    <div id="settings" class="panel hidden">
-      <button id="settings-mute" type="button">SOUND: ON</button>
-      <span class="hint">Sound: WebAudio synth. Save: automatic.</span>
+    <div id="how-panel" class="subpanel">
+      <p><b>Move:</b> W A S D or left stick — A / D turn you, W walks forward.<br>
+      <b>Sprint:</b> Shift or RUN. <b>Enter car:</b> E or CAR. <b>Punch:</b> F or HIT.<br>
+      <b>Drive:</b> W accelerate, S brake / reverse, A / D steer.<br>
+      <b>Mute:</b> M. <b>Pause:</b> P. Win at $50,000 with Rosa's story, or $100,000 rich.<br>
+      Hospital refills health. Chop Shop buys stolen cars.</p>
+      <button id="btn-how-close">Close</button>
     </div>
-    <p class="hint">Click Play · Mouse aims · WASD moves · E steals cars</p>
-  </div>
-</div>
-
-<!-- pause / map screen -->
-<div id="screen-pause" class="screen hidden">
-  <div class="pause-wrap">
-    <div class="pause-tabs"><span class="tab active">MAP</span><span class="tab">STATS</span></div>
-    <div class="pause-body">
-      <canvas id="pause-map" width="460" height="460"></canvas>
-      <div id="pause-stats" class="panel"></div>
-    </div>
-    <div class="menu-buttons row">
-      <button id="btn-resume" type="button">Resume</button>
-      <button id="btn-save" type="button">Save Game</button>
-      <button id="btn-quit" type="button">Quit to Title</button>
+    <div id="settings-panel" class="subpanel">
+      <label><input type="checkbox" id="opt-mute"> Mute all sound</label><br>
+      <label><input type="checkbox" id="opt-shadows" checked> Shadows</label><br>
+      <button id="btn-settings-close">Close</button>
     </div>
   </div>
 </div>
 
-<!-- win screen -->
-<div id="screen-win" class="screen hidden">
-  <div class="end-wrap">
-    <h2>SOLMAR IS YOURS</h2>
-    <p>You finished the story — $50,000 and the whole city.</p>
-    <div class="menu-buttons">
-      <button id="btn-again" type="button">Play again</button>
-      <button id="btn-menu2" type="button">Title screen</button>
-    </div>
+<!-- Win / lose screen: simple and small. -->
+<div id="end">
+  <div class="panel small">
+    <h2 id="end-title">BUSTED</h2>
+    <p id="end-text"></p>
+    <button id="btn-again">Play again</button>
   </div>
 </div>
 
-<!-- busted screen -->
-<div id="screen-busted" class="screen hidden">
-  <div class="end-wrap">
-    <h2>BUSTED</h2>
-    <p>The Solmar PD caught you. The story restarts from your last save.</p>
-    <div class="menu-buttons">
-      <button id="btn-busted" type="button">Try again</button>
-    </div>
-  </div>
-</div>
-
-<!-- wasted screen -->
-<div id="screen-wasted" class="screen hidden">
-  <div class="end-wrap">
-    <h2>WASTED</h2>
-    <p>You went down in Solmar City. The story restarts from your last save.</p>
-    <div class="menu-buttons">
-      <button id="btn-wasted" type="button">Try again</button>
-    </div>
-  </div>
-</div>
-
-<script type="module" src="./src/boot.js"></script>
+<script type="module" src="./src/main.js"></script>
 </body>
 </html>

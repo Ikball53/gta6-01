@@ -1,183 +1,59 @@
-/* SOLMAR HEAT — sunset HUD: small text, corners only, no big mid-screen text. */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1030; }
-body { font-family: Arial, Helvetica, sans-serif; color: #fff; }
+/* SOLMAR HEAT — small text everywhere in play; the HUD stays tiny in the
+   top-left corner, the touch joystick is 160px and the buttons are 88px. */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; overflow: hidden; background: #0a0e14;
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
 #game, #game canvas { position: fixed; inset: 0; display: block; }
-.hidden { display: none !important; }
-.panel {
-  background: rgba(24, 12, 48, 0.82);
-  border: 1px solid rgba(255, 210, 122, 0.45);
-  border-radius: 8px;
-  padding: 8px 10px;
-  backdrop-filter: blur(2px);
-}
-button {
-  font-family: Arial, Helvetica, sans-serif;
-  background: rgba(24, 12, 48, 0.85);
-  color: #fff; border: 2px solid #fff;
-  border-radius: 8px; padding: 10px 22px;
-  font-size: 16px; font-weight: bold; cursor: pointer;
-}
-button:hover { background: #ff8a3d; border-color: #ffd27a; }
 
-/* crosshair */
-#crosshair {
-  position: fixed; left: 50%; top: 50%; z-index: 5;
-  transform: translate(-50%, -50%);
-  font-size: 20px; font-weight: bold; color: rgba(255,255,255,0.85);
-  text-shadow: 0 0 4px #000; pointer-events: none;
-}
+#hud { position: fixed; top: 10px; left: 10px; z-index: 5; pointer-events: none;
+  color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.8); font-size: 12px; line-height: 1.5; }
+#minimap { width: 168px; height: 168px; border: 2px solid rgba(255,255,255,.75);
+  border-radius: 6px; background: #223; display: block; }
+#money { font-size: 15px; font-weight: 700; margin-top: 4px; }
+#health { width: 140px; height: 8px; background: rgba(0,0,0,.55); border-radius: 4px;
+  margin-top: 3px; overflow: hidden; }
+#health-fill { height: 100%; width: 100%; background: #4caf50; }
+#stars { font-size: 13px; letter-spacing: 2px; }
+#objective { max-width: 240px; font-size: 11px; color: #ffe082; }
 
-/* top-left: minimap */
-#hud-map { position: fixed; top: 10px; left: 10px; z-index: 6; text-align: center; }
+#speed { position: fixed; right: 12px; bottom: 12px; z-index: 5; color: #fff;
+  font-size: 13px; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,.8); display: none; }
+#toast { position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%); z-index: 6;
+  color: #fff; background: rgba(0,0,0,.65); font-size: 12px; padding: 6px 12px;
+  border-radius: 12px; opacity: 0; transition: opacity .4s; pointer-events: none;
+  max-width: 80vw; text-align: center; }
+#err { position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 9;
+  color: #ff8a80; font-size: 11px; text-shadow: 0 1px 2px #000; pointer-events: none; }
 
-/* top-center: mission card */
-#hud-topcenter { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 6; width: min(340px, 44vw); }
-#mission-card { margin-bottom: 8px; border-left: 4px solid #ffd27a; }
-#mission-title { color: #ffd27a; font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
-#mission-text { font-size: 13px; line-height: 1.35; margin: 4px 0; }
-#mission-next { font-size: 11px; color: #7ae0ff; margin-top: 4px; }
-#mission-dist { font-size: 11px; color: #ccc; margin-top: 2px; text-align: right; }
-.bar { height: 8px; background: rgba(255,255,255,0.18); border-radius: 4px; overflow: hidden; margin-top: 4px; }
-.bar.small { height: 7px; }
-.bar.blue #armor-fill { background: #7ae0ff; }
-#mission-bar { height: 100%; width: 0%; background: #2ee06a; transition: width 0.3s; }
-#health-fill { height: 100%; width: 100%; background: #2ee06a; }
-#armor-fill { height: 100%; width: 0%; background: #7ae0ff; }
-#status .row { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; }
-#status .label { color: #ffd27a; }
-
-/* top-right */
-#hud-topright { position: fixed; top: 10px; right: 12px; z-index: 6; text-align: right; width: 236px; }
-#hud-topright #status { margin-top: 8px; text-align: left; }
-#hud-day {
-  display: inline-block; background: #ff5a7a; color: #fff;
-  font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 4px;
-}
-#hud-clock { font-size: 13px; font-weight: bold; margin-top: 2px; text-shadow: 0 1px 3px #000; }
-#hud-cash { font-size: 26px; font-weight: bold; color: #7dff8a; text-shadow: 0 2px 4px #000; }
-#hud-stars { font-size: 20px; letter-spacing: 2px; color: #ffd27a; text-shadow: 0 1px 3px #000; }
-#hud-stars.hot { color: #ff4040; }
-#weapon-slots { display: flex; gap: 5px; justify-content: flex-end; margin-top: 6px; }
-.slot {
-  background: rgba(24, 12, 48, 0.8); border: 1px solid rgba(255,255,255,0.4);
-  border-radius: 6px; padding: 4px 6px; font-size: 10px; text-align: center; min-width: 52px;
-}
-.slot.active { border-color: #ffd27a; background: rgba(255, 138, 61, 0.5); }
-.slot b { display: block; font-size: 11px; color: #ffd27a; }
-.slot span { display: block; font-size: 10px; }
-.slot em { display: block; font-style: normal; font-size: 9px; color: #7ae0ff; }
-
-/* minimap (top-left) */
-#minimap {
-  width: 180px; height: 180px; border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.85);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.6);
-}
-#hud-district { font-size: 15px; font-weight: bold; text-shadow: 0 1px 3px #000; margin-top: 4px; }
-#hud-street { font-size: 11px; color: #ffd27a; text-shadow: 0 1px 3px #000; }
-
-/* bottom-right speedometer */
-#speedo { position: fixed; right: 16px; bottom: 14px; z-index: 6; text-align: right; }
-#speed-num { font-size: 52px; font-weight: bold; line-height: 0.9; text-shadow: 0 2px 6px #000; }
-#speed-unit { font-size: 12px; color: #7ae0ff; font-weight: bold; }
-#speed-car { font-size: 13px; color: #ffd27a; font-weight: bold; text-shadow: 0 1px 3px #000; }
-
-/* bottom-center dialogue */
-#dialogue {
-  position: fixed; left: 50%; bottom: 16px; z-index: 7;
-  transform: translateX(-50%);
-  width: min(520px, 72vw);
-  border-left: 4px solid #ff8a3d;
-}
-#dlg-name { color: #ffd27a; font-size: 12px; font-weight: bold; }
-#dlg-text { font-size: 14px; line-height: 1.4; margin-top: 2px; }
-
-/* touch controls */
+/* Touch controls: hidden unless the device (or ?touch=1) asks for them. */
 #touch-ui { display: none; }
 body.touch #touch-ui { display: block; }
-#stick {
-  position: fixed; left: 20px; bottom: 20px; z-index: 8;
-  width: 160px; height: 160px; border-radius: 50%;
-  background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.4);
-  touch-action: none;
-}
-#stick-knob {
-  position: absolute; left: 50%; top: 50%; margin: -32px 0 0 -32px;
-  width: 64px; height: 64px; border-radius: 50%;
-  background: rgba(255,210,122,0.8);
-}
-#touch-buttons { position: fixed; right: 20px; bottom: 120px; z-index: 8; display: flex; gap: 12px; }
-#touch-buttons button { width: 88px; height: 88px; border-radius: 50%; padding: 0; font-size: 15px; touch-action: none; }
+#stick-base { position: fixed; left: 18px; bottom: 18px; z-index: 7; width: 160px; height: 160px;
+  border-radius: 50%; background: rgba(255,255,255,.10); border: 2px solid rgba(255,255,255,.35);
+  touch-action: none; }
+#stick-knob { position: absolute; left: 48px; top: 48px; width: 64px; height: 64px;
+  border-radius: 50%; background: rgba(255,255,255,.45); border: 2px solid rgba(255,255,255,.7); }
+#touch-buttons { position: fixed; right: 18px; bottom: 26px; z-index: 7; display: flex; gap: 12px; }
+.tbtn { width: 88px; height: 88px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55);
+  background: rgba(20,30,50,.55); color: #fff; font-size: 13px; font-weight: 700;
+  touch-action: none; }
 
-/* screens */
-.screen {
-  position: fixed; inset: 0; z-index: 20;
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(180deg, rgba(26,16,48,0.25), rgba(26,16,48,0.72));
-}
-.title-wrap { text-align: center; max-width: 640px; padding: 20px; }
-.game-title {
-  font-size: min(96px, 14vw); line-height: 0.9; font-weight: 900;
-  color: #fff; letter-spacing: 2px;
-  text-shadow: 0 4px 0 #c65d8a, 0 8px 24px rgba(0,0,0,0.6);
-}
-.game-title span {
-  background: linear-gradient(180deg, #ffd27a, #ff5a7a);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  text-shadow: none; filter: drop-shadow(0 4px 0 rgba(198,93,138,0.9));
-}
-.tagline { color: #7ae0ff; font-size: 17px; font-weight: bold; margin: 10px 0 4px; text-shadow: 0 1px 3px #000; }
-.save-info { color: #7dff8a; font-size: 13px; min-height: 16px; }
-.menu-buttons { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 18px; }
-.menu-buttons.row { flex-direction: row; justify-content: center; flex-wrap: wrap; }
-.menu-buttons button { width: 240px; }
-.menu-buttons.row button { width: auto; }
-#howto, #settings { margin-top: 14px; font-size: 13px; line-height: 1.5; text-align: left; }
-.hint { font-size: 12px; color: #ddd; margin-top: 14px; text-shadow: 0 1px 3px #000; }
-.pause-wrap { width: min(920px, 94vw); text-align: center; }
-.pause-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
-.tab {
-  padding: 8px 26px; border-radius: 8px; font-weight: bold; font-size: 14px;
-  background: rgba(24,12,48,0.8); border: 2px solid rgba(255,255,255,0.4);
-}
-.tab.active { background: linear-gradient(90deg, #ff5a7a, #ff8a3d); border-color: #fff; }
-.pause-body { display: flex; gap: 14px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
-#pause-map { border: 3px solid #7ae0ff; border-radius: 10px; max-width: 46vw; max-height: 56vh; }
-#pause-stats { text-align: left; font-size: 14px; line-height: 1.7; min-width: 260px; }
-.stat-big { color: #ffd27a; font-size: 22px; font-weight: bold; }
-.legend { font-size: 12px; color: #7ae0ff; margin-top: 8px; }
-.end-wrap { text-align: center; padding: 30px; }
-.end-wrap h2 { font-size: 56px; letter-spacing: 2px; text-shadow: 0 4px 0 #c65d8a, 0 8px 24px rgba(0,0,0,0.6); }
-.end-wrap p { font-size: 15px; margin: 12px 0 6px; }
-
-@media (max-width: 760px) {
-  #hud-topcenter { width: min(300px, 58vw); }
-  #hud-topright { width: 190px; }
-  #mission-text { font-size: 11px; }
-  #minimap { width: 120px; height: 120px; }
-  #hud-cash { font-size: 20px; }
-  #speed-num { font-size: 36px; }
-  #dialogue { bottom: 8px; width: 92vw; }
-  .game-title { font-size: 56px; }
-  #stick { width: 140px; height: 140px; }
-  #stick-knob { width: 56px; height: 56px; margin: -28px 0 0 -28px; }
-  #touch-buttons button { width: 76px; height: 76px; font-size: 14px; }
-}
-
-/* short landscape screens (phones held sideways): keep the HUD compact */
-@media (max-height: 500px) {
-  #minimap { width: 120px; height: 120px; }
-  #hud-district { font-size: 12px; }
-  #hud-street { font-size: 10px; }
-  #hud-topcenter { width: min(300px, 46vw); }
-  #mission-text { font-size: 11px; }
-  #hud-cash { font-size: 20px; }
-  #hud-stars { font-size: 16px; }
-  #speed-num { font-size: 34px; }
-  #stick { width: 150px; height: 150px; }
-  #stick-knob { width: 60px; height: 60px; margin: -30px 0 0 -30px; }
-  #touch-buttons { bottom: 90px; }
-  #touch-buttons button { width: 84px; height: 84px; }
-  #dialogue { bottom: 8px; }
-}
+/* Menus: centred panels, small text, no big mid-game text. */
+#menu, #end { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center;
+  justify-content: center; background: rgba(8,12,20,.55); }
+#end { display: none; background: rgba(8,12,20,.7); }
+.panel { background: rgba(12,18,30,.88); border: 1px solid rgba(255,255,255,.25);
+  border-radius: 12px; padding: 22px 26px; text-align: center; color: #fff; max-width: 520px; }
+.panel.small { max-width: 380px; }
+.panel h1 { margin: 0 0 6px; font-size: 44px; letter-spacing: 3px; color: #ffb300; }
+.panel h2 { margin: 0 0 8px; font-size: 26px; letter-spacing: 2px; color: #ffb300; }
+.panel .tag { font-size: 13px; color: #cfd8dc; margin: 0 0 14px; line-height: 1.5; }
+.panel p { font-size: 12px; line-height: 1.6; color: #e0e0e0; }
+.panel .row { margin: 8px 0; }
+.panel button { font-size: 14px; font-weight: 600; padding: 9px 18px; margin: 3px;
+  border-radius: 8px; border: 1px solid rgba(255,255,255,.4); background: #274b73;
+  color: #fff; cursor: pointer; }
+.panel button:hover { background: #35648f; }
+.subpanel { display: none; text-align: left; margin-top: 10px; border-top: 1px solid rgba(255,255,255,.2);
+  padding-top: 10px; }
+.subpanel label { font-size: 13px; }
