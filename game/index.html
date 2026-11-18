@@ -15,8 +15,15 @@
 <!-- crosshair -->
 <div id="crosshair">+</div>
 
-<!-- top-left: mission card + status -->
-<div id="hud-topleft">
+<!-- top-left: circular minimap + district (north-up; only the arrow turns) -->
+<div id="hud-map">
+  <canvas id="minimap" width="180" height="180"></canvas>
+  <div id="hud-district">OLD TOWN</div>
+  <div id="hud-street">Palm Ave</div>
+</div>
+
+<!-- top-center: mission card -->
+<div id="hud-topcenter">
   <div id="mission-card" class="panel hidden">
     <div id="mission-title">MISSION</div>
     <div id="mission-text"></div>
@@ -24,28 +31,21 @@
     <div id="mission-next"></div>
     <div id="mission-dist"></div>
   </div>
-  <div id="status" class="panel">
-    <div class="row"><span class="label">HEALTH</span><span id="health-num">100</span></div>
-    <div class="bar small"><div id="health-fill"></div></div>
-    <div class="row"><span class="label">ARMOR</span></div>
-    <div class="bar small blue"><div id="armor-fill"></div></div>
-  </div>
 </div>
 
-<!-- top-right: cash, clock, stars, weapons -->
+<!-- top-right: cash, clock, stars, weapons, health/armor -->
 <div id="hud-topright">
   <div id="hud-day">SAT</div>
   <div id="hud-clock">17:20</div>
   <div id="hud-cash">$320</div>
   <div id="hud-stars" class="stars">☆☆☆☆☆</div>
   <div id="weapon-slots"></div>
-</div>
-
-<!-- bottom-left: circular minimap + district -->
-<div id="hud-bottomleft">
-  <canvas id="minimap" width="180" height="180"></canvas>
-  <div id="hud-district">OLD TOWN</div>
-  <div id="hud-street">Palm Ave</div>
+  <div id="status" class="panel">
+    <div class="row"><span class="label">HEALTH</span><span id="health-num">100</span></div>
+    <div class="bar small"><div id="health-fill"></div></div>
+    <div class="row"><span class="label">ARMOR</span></div>
+    <div class="bar small blue"><div id="armor-fill"></div></div>
+  </div>
 </div>
 
 <!-- bottom-right: speedometer -->
