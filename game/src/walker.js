@@ -130,27 +130,31 @@ export function updateWalker(W, dt) {
   const move = K.pollMove();
   const sprint = K.sprint();
   const speed = sprint ? 7.5 : 4.4;
-  // camera-relative movement: forward is where the camera looks
-  const camDir = new THREE.Vector3();
-  W.camera.getWorldDirection(camDir);
-  camDir.y = 0; camDir.normalize();
-  const right = new THREE.Vector3().crossVectors(camDir, new THREE.Vector3(0, 1, 0)).negate();
-  const wish = new THREE.Vector3()
-    .addScaledVector(camDir, move.y)
-    .addScaledVector(right, move.x);
-  const moving = wish.lengthSq() > 0.001;
-  if (moving) {
-    wish.normalize();
-    P.mesh.position.addScaledVector(wish, speed * dt);
-    const targetHeading = Math.atan2(wish.x, wish.z);
-    let dh = targetHeading - P.heading;
-    while (dh > Math.PI) dh -= Math.PI * 2;
-    while (dh < -Math.PI) dh += Math.PI * 2;
-    // Frame-rate-independent turn smoothing: the old dt*12 snapped almost
-    // instantly on slow phones (dt 0.05 -> factor 0.6 in one frame), which
-    // made the heading — and the minimap arrow — swing in stiff jumps.
-    P.heading += dh * (1 - Math.exp(-dt * 10));
+  // Character-relative movement (GTA-style): the stick / WASD moves the
+  // player along their OWN facing, and left/right TURNS the player.
+  // The old camera-relative scheme fed the camera direction back into the
+  // movement direction while the chase camera was slaved to the player
+  // heading, so holding the stick sideways made the target heading chase
+  // itself in a circle and the player spun forever (~300 deg/s) — which is
+  // what made the minimap arrow spin nonstop. Turning now comes only from
+  // explicit left/right input, so there is no feedback loop: the heading
+  // only changes while the stick is held sideways, and stops dead the
+  // moment it is released.
+  // Sign: heading DECREASES for stick-right. Facing is (sin h, cos h) and
+  // the minimap draws +x right / +z down, so a right turn from facing
+  // south (+z) is toward west (-x), i.e. heading 0 -> -PI/2. (The old
+  // `heading +=` direction and the old inverted `right` vector both turned
+  // the player screen-left for stick-right.)
+  const TURN_RATE = 3.0; // rad/s at full deflection: a full 360 turn ~2.1 s
+  if (Math.abs(move.x) > 0.001) {
+    P.heading -= move.x * TURN_RATE * dt;
     P.mesh.rotation.y = P.heading;
+  }
+  const moving = Math.abs(move.y) > 0.001;
+  if (moving) {
+    const fx = Math.sin(P.heading), fz = Math.cos(P.heading);
+    P.mesh.position.x += fx * move.y * speed * dt;
+    P.mesh.position.z += fz * move.y * speed * dt;
     P.mesh.userData.walkPhase += dt * (sprint ? 13 : 9);
     const ph = P.mesh.userData.walkPhase;
     P.mesh.userData.legL.rotation.x = Math.sin(ph) * 0.7;

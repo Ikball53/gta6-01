@@ -55,7 +55,7 @@ export function updateDriver(W, dt) {
   P.carSpeed = Math.max(-12, Math.min(spec.max, P.carSpeed));
   // steering scales with speed, less at top speed
   const steerAuthority = Math.min(1, Math.abs(P.carSpeed) / 8);
-  car.heading += move.x * 1.9 * steerAuthority * dt * Math.sign(P.carSpeed || 1);
+  car.heading -= move.x * 1.9 * steerAuthority * dt * Math.sign(P.carSpeed || 1);
   const fx = Math.sin(car.heading), fz = Math.cos(car.heading);
   car.x += fx * P.carSpeed * dt;
   car.z += fz * P.carSpeed * dt;
