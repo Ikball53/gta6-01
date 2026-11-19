@@ -1,19 +1,23 @@
-// SOLMAR HEAT — entrypoint for the make.fun GTA 6 bounty.
-// The screenshots in screenshots/ are real renders of the game itself, captured
-// from the running build on 2026-11-18 (menu over the city, a police chase, and
-// a delivery mission), and README.md up top carries the make.fun badges.
-// Mirrors game/ and screenshots/ into the output directory, then writes the
-// dossier with the kit's buildDossier so the scorer can verify it byte for byte.
-// Runs on plain Node 22 with the standard library only; no install, no network.
+// SOLMAR HEAT — make.fun gta6-01 entrypoint.
+//
+// Job: stage the playable game and its screenshots into the grader's output
+// directory, then build the dossier from that staged copy.
+//
+// Safety note that shapes everything below: in the grading sandbox the output
+// directory is a mount point. Removing it (or trying to) fails with EBUSY and
+// the whole run is rejected. So this program only ever creates directories and
+// overwrites files inside them — it never deletes the output root, and it
+// never clears the root's contents either. Re-running into the same output
+// directory is therefore harmless.
 
-import { buildDossier } from './vendor/makefun-game.ts';
-import { cpSync, existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { cpSync, mkdirSync, statSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { buildDossier } from "./vendor/makefun-game.ts";
 
-const ENTRY_ROOT = resolve(import.meta.dirname);
-const OUT_DIR = resolve(process.env.MAKEFUN_OUTPUT_DIR || '/output');
-
-const DOSSIER_CAPS = {
+// The scorer's gate caps, mirrored so this program refuses exactly where the
+// scorer would. Keys match the vendored library's caps argument.
+const GATE_CAPS = {
   text_max_bytes: 163840,
   screenshots: { max: 4, max_bytes: 262144 },
   game_max_files: 993,
@@ -21,45 +25,72 @@ const DOSSIER_CAPS = {
   game_path_max_bytes: 1000,
 };
 
-function countTree(dir) {
-  let files = 0;
-  let bytes = 0;
-  for (const name of readdirSync(dir).sort()) {
-    const full = join(dir, name);
-    const st = statSync(full);
-    if (st.isDirectory()) {
-      const sub = countTree(full);
-      files += sub.files;
-      bytes += sub.bytes;
-    } else if (st.isFile()) {
-      files += 1;
-      bytes += st.size;
-    }
-  }
-  return { files, bytes };
+function bail(message: string): never {
+  process.stderr.write(`main.ts: ${message}\n`);
+  process.exit(1);
 }
 
-function handIn() {
-  const gameDir = join(ENTRY_ROOT, 'game');
-  const shotsDir = join(ENTRY_ROOT, 'screenshots');
-  if (!existsSync(join(gameDir, 'index.html'))) {
-    throw new Error('hand-in refused: game/index.html is missing');
+function isDirectory(path: string): boolean {
+  try {
+    return statSync(path).isDirectory();
+  } catch {
+    return false;
   }
-  mkdirSync(OUT_DIR, { recursive: true });
-  cpSync(gameDir, join(OUT_DIR, 'game'), { recursive: true, dereference: false });
-  if (existsSync(shotsDir)) {
-    cpSync(shotsDir, join(OUT_DIR, 'screenshots'), { recursive: true, dereference: false });
-  }
-  const dossierBytes = buildDossier(OUT_DIR, DOSSIER_CAPS);
-  writeFileSync(join(OUT_DIR, 'dossier.json'), dossierBytes);
-  // Re-read the dossier and confirm it is the schema the scorer expects.
-  const written = JSON.parse(new TextDecoder().decode(dossierBytes));
-  if (written.schema !== 'makefun/dossier/v1') {
-    throw new Error('hand-in refused: dossier schema mismatch: ' + String(written.schema));
-  }
-  const gameStats = countTree(join(OUT_DIR, 'game'));
-  const shotNames = existsSync(join(OUT_DIR, 'screenshots')) ? readdirSync(join(OUT_DIR, 'screenshots')).sort() : [];
-  console.log(`SOLMAR HEAT handed in: ${gameStats.files} game files (${gameStats.bytes} bytes), ${shotNames.length} screenshots, dossier ${dossierBytes.length} bytes -> ${OUT_DIR}`);
 }
 
-handIn();
+function isFile(path: string): boolean {
+  try {
+    return statSync(path).isFile();
+  } catch {
+    return false;
+  }
+}
+
+// Where this entry lives: derived from the module URL so the program works no
+// matter which directory the grader launches it from.
+const entryDir: string = dirname(fileURLToPath(import.meta.url));
+
+// Where the staged entry goes: the grader names it, /output is the fallback.
+const outputDir: string = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
+
+const sourceGame: string = join(entryDir, "game");
+const sourceShots: string = join(entryDir, "screenshots");
+const sourceIndex: string = join(sourceGame, "index.html");
+
+if (!isDirectory(sourceGame)) {
+  bail(`missing game directory beside the entrypoint: ${sourceGame}`);
+}
+if (!isFile(sourceIndex)) {
+  bail(`missing game/index.html beside the entrypoint: ${sourceIndex}`);
+}
+if (!isDirectory(sourceShots)) {
+  bail(`missing screenshots directory beside the entrypoint: ${sourceShots}`);
+}
+
+const stagedGame: string = join(outputDir, "game");
+const stagedShots: string = join(outputDir, "screenshots");
+
+try {
+  // Create-only staging: recursive mkdir is a no-op when the directory (or
+  // the mount point itself) already exists.
+  mkdirSync(outputDir, { recursive: true });
+  mkdirSync(stagedGame, { recursive: true });
+  mkdirSync(stagedShots, { recursive: true });
+
+  // Byte-exact recursive copies that overwrite whatever a previous run left.
+  cpSync(sourceGame, stagedGame, { recursive: true, force: true });
+  cpSync(sourceShots, stagedShots, { recursive: true, force: true });
+
+  // The dossier describes the staged copy, so it is built from the output
+  // directory and written back there verbatim.
+  const dossierBytes: Uint8Array = buildDossier(outputDir, GATE_CAPS);
+  writeFileSync(join(outputDir, "dossier.json"), dossierBytes);
+
+  process.stdout.write(
+    `SOLMAR HEAT ready: staged game/ and screenshots/ from ${entryDir} ` +
+      `into ${outputDir}; dossier.json is ${dossierBytes.length} bytes\n`,
+  );
+} catch (err) {
+  const detail: string = err instanceof Error ? err.message : String(err);
+  bail(`staging failed: ${detail}`);
+}
